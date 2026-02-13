@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Your Personalized Nutrition Guide</title>
+
+<style>
+    @page { margin: 12mm; }
+
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+    }
+
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #ffffff;
+        color: #1a1a1a;
+        margin: 0;
+        line-height: 1.2;
+        font-size: 15px;
+    }
+
+    .container {
+        max-width: 850px;
+        margin: auto;
+        padding: 0 10px;
+    }
+
+    .hero-header {
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .hero-header h1 {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .hero-header p {
+        margin: 2px 0 0 0;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .section-card {
+        padding: 8px 0;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #f3f4f6;
+        page-break-inside: avoid;
+    }
+
+    .section-title {
+        font-size: 17px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #374151;
+    }
+
+    .section-content {
+        font-size: 15px;
+        white-space: pre-wrap;
+    }
+
+    .meal-plan-container {
+        margin-top: 15px;
+    }
+
+    .meal-plan-banner {
+        background: #f9fafb;
+        color: #111827;
+        padding: 10px 15px;
+        font-size: 19px;
+        font-weight: 700;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 10px;
+    }
+
+    .meal-card {
+        border: 1px solid #e5e7eb;
+        margin-bottom: 15px;
+        page-break-inside: avoid;
+    }
+
+    .meal-time-header {
+        background: #f9fafb;
+        padding: 5px 15px;
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e5e7eb;
+        color: #4b5563;
+    }
+
+    .options-row {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .option-cell {
+        display: table-cell;
+        padding: 10px 15px;
+        border-right: 1px solid #f3f4f6;
+        vertical-align: top;
+    }
+
+    .option-cell:last-child {
+        border-right: none;
+    }
+
+    .option-label {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #6b7280;
+        border-bottom: 1px solid #e5e7eb;
+        display: inline-block;
+        margin-bottom: 4px;
+    }
+
+    .option-text {
+        font-size: 14px;
+        line-height: 1.3;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 40px 0;
+        font-size: 11px;
+        color: #9ca3af;
+        page-break-inside: avoid;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="hero-header">
+        <h1>Nutrition Strategy</h1>
+        <p>Your guide to staying healthy.</p>
+    </div>
+
+    {% set a = namespace(meal_plan_placed = false) %}
+
+    {% for i in my_dict %}
+    {% if i!='diet_meal_generated' %}
+
+    {% if 'Meal' in i %}
+
+            {% if not a.meal_plan_placed %}
+            <div class="meal-plan-container">
+                <div class="meal-plan-banner">Your Meal plan</div>
+            {% set a.meal_plan_placed = true %}
+            {% endif %}
+
+            <div class="meal-card">
+                <div class="meal-time-header">{{ i }}</div>
+
+                <div class="options-row">
+                    {% for j in my_dict[i] %}
+                        <div class="option-cell">
+                            <span class="option-label">{{ j }}</span>
+                            <div class="option-text">
+                                {{ my_dict[i][j] | safe }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        {% else %}
+
+            <div class="section-card">
+                <span class="section-title">{{ i }}</span>
+                <div class="section-content">
+                    {{ my_dict[i] | safe }}
+                </div>
+            </div>
+
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="footer">
+        © 2026 Personalized Wellness Portal.<br>
+        Consult a physician before starting any new diet program.
+    </div>
+
+</div>
+
+</body>
+</html>

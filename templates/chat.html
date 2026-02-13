@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Diet Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gradient-brand: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --bg-app: #F7FAFC; /* Clean Light BG */
+      --text-dark: #2D3748;
+      --text-white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Prevent body scroll, only chat scrolls */
+    }
+
+    /* --- HEADER (Glass Sticky) --- */
+    .app-header {
+      padding: 20px 40px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+
+    .logo {
+      font-weight: 800; /* Extra Thick */
+      font-size: 26px;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    /* --- CHAT VIEWPORT --- */
+    .chat-viewport {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .message-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .message-row.user-row {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 18px 24px;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.6;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      word-break: break-word;
+    }
+
+    /* Bot Bubble Style */
+    .bot-bubble {
+      background: #FFFFFF;
+      color: var(--text-dark);
+      border-radius: 4px 24px 24px 24px; /* Asymmetric Left */
+      border-left: 4px solid #764ba2;
+    }
+
+    .bot-bubble a {
+      color: #764ba2;
+      font-weight: 800;
+      text-decoration: none;
+      border-bottom: 2px solid #764ba2;
+    }
+
+    /* User Bubble Style */
+    .user-bubble {
+      background: var(--gradient-brand);
+      color: var(--text-white);
+      border-radius: 24px 4px 24px 24px; /* Asymmetric Right */
+      text-align: right;
+      box-shadow: 0 10px 20px rgba(118, 75, 162, 0.25);
+    }
+
+    /* --- FLOATING INPUT --- */
+    .input-container {
+      padding: 20px 40px 40px 40px;
+      /* Fade gradient at bottom */
+      background: linear-gradient(to top, rgba(255,255,255,0.9) 60%, rgba(255,255,255,0) 100%);
+      display: flex;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    /* We style the form as the floating bar */
+    .floating-form {
+      width: 100%;
+      max-width: 900px;
+      background: white;
+      padding: 8px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+
+    .floating-form:focus-within {
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px rgba(118, 75, 162, 0.15);
+      border-color: #764ba2;
+    }
+
+    textarea {
+      flex: 1;
+      border: none;
+      padding: 14px 24px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      outline: none;
+      resize: none;
+      background: transparent;
+      height: 52px; /* Single line feel */
+      color: var(--text-dark);
+    }
+
+    .send-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--text-dark);
+      color: white;
+      border: none;
+      font-weight: 800;
+      font-size: 20px;
+      cursor: not-allowed;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 2px;
+      opacity: 0.5;
+    }
+
+    .send-btn.active {
+      background: var(--gradient-brand);
+      cursor: pointer;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .send-btn.active:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <header class="app-header">
+    <div class="logo">NOVA.AI</div>
+    </header>
+
+  <div class="chat-viewport">
+    {% for i in range(1, my_list|length) %}
+      {% if my_list[i]['role'] == 'assistant' %}
+
+        <div class="message-row">
+          <div class="bubble bot-bubble">
+            {% if 'diet_meal_generated' in my_list[i]['content'][:50] %}
+              <a href="{{url_for('download')}}">Click Here</a> to download your Diet plan PDF.
+            {% else %}
+              {{ my_list[i]['content']|safe }}
+            {% endif %}
+          </div>
+        </div>
+
+      {% else %}
+
+        <div class="message-row user-row">
+          <div class="bubble user-bubble">
+            {{ my_list[i]['content'] }}
+          </div>
+        </div>
+
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="input-container">
+    <form id="chatForm" action="{{ url_for('chat') }}" method="post" class="floating-form">
+      <textarea id="chatInput" name="user_data" placeholder="Type your message..."></textarea>
+      <button id="sendBtn" class="send-btn" type="submit" disabled>↑</button>
+    </form>
+  </div>
+
+  <script>
+    const textarea = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatViewport = document.querySelector(".chat-viewport");
+    const form = document.getElementById("chatForm");
+
+    let submitting = false;
+
+    // Enable / disable send button
+    textarea.addEventListener("input", () => {
+      if (textarea.value.trim()) {
+        sendBtn.disabled = false;
+        sendBtn.classList.add("active");
+      } else {
+        sendBtn.disabled = true;
+        sendBtn.classList.remove("active");
+      }
+    });
+
+    // Enter to send (Shift+Enter = newline)
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled && !submitting) {
+          submitting = true;
+          form.requestSubmit();
+        }
+      }
+    });
+
+    // Prevent double submit + disable AFTER submit starts
+    form.addEventListener("submit", () => {
+      setTimeout(() => {
+        textarea.disabled = true;
+        sendBtn.disabled = true;
+        sendBtn.classList.remove("active");
+      }, 0);
+    });
+
+    // Auto-scroll
+    window.addEventListener("load", () => {
+      chatViewport.scrollTop = chatViewport.scrollHeight;
+    });
+  </script>
+
+</body>
+</html>
